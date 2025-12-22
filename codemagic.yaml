@@ -1,1 +1,286 @@
+# Configuração do Codemagic para SRM App
+#
+# Este arquivo contém workflows para:
+# - Build do Android (APK e AAB)
+# - Build do iOS
+# - Build do Electron (Windows e macOS)
+# - Testes e validação
+#
+# IMPORTANTE: Configure as variáveis de ambiente no painel do Codemagic:
+# - API_SECRET
+# - API_LOGIN
+# - API_URL
+# - API_URL_HOMOL
+# - NUXT_PUBLIC_API_SECRET
+# - NUXT_PUBLIC_APP_NAME
+# - NUXT_PUBLIC_APP_VERSION
+# - E outras variáveis necessárias
+#
+# Para configurar variáveis:
+# 1. Acesse o painel do Codemagic
+# 2. Vá em "Teams" > "Environment variables"
+# 3. Crie um grupo chamado "codemagic" ou use o grupo padrão
+# 4. Adicione as variáveis necessárias
 
+workflows:
+  # Workflow para build do Android (APK)
+  android-build:
+    name: Android Build
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - codemagic # Grupo para variáveis de ambiente compartilhadas
+      vars:
+        PACKAGE_NAME: "com.sygecom.srm"
+        # Variáveis de ambiente da API
+        # Configure essas variáveis no painel do Codemagic (Environment variables)
+        # Elas serão automaticamente injetadas durante o build
+        # API_SECRET: $API_SECRET
+        # API_LOGIN: $API_LOGIN
+        # API_URL: $API_URL
+        # API_URL_HOMOL: $API_URL_HOMOL
+        # NUXT_PUBLIC_API_SECRET: $NUXT_PUBLIC_API_SECRET
+        # NUXT_PUBLIC_APP_NAME: "SRM App"
+        # NUXT_PUBLIC_APP_VERSION: "2.0.0"
+      node: 20.11.0
+      java: 17
+      xcode: latest
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Executar lint
+        script: |
+          npm run lint || echo "Lint falhou, mas continuando..."
+      - name: Gerar build estático do Nuxt
+        script: |
+          npm run generate
+      - name: Sincronizar com Capacitor
+        script: |
+          npx cap sync android
+      - name: Build do Android
+        script: |
+          cd android
+          ./gradlew clean
+          ./gradlew assembleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - user@example.com # Configure seu email para notificações
+        notify:
+          success: true
+          failure: false
+      scripts:
+        - name: Publicar APK/AAB
+          script: |
+            echo "Artefatos de build disponíveis:"
+            find android/app/build/outputs -name "*.apk" -o -name "*.aab" | head -5
+
+  # Workflow para build do Android (AAB para Play Store)
+  android-release:
+    name: Android Release (AAB)
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - codemagic
+      vars:
+        PACKAGE_NAME: "com.sygecom.srm"
+      node: 20.11.0
+      java: 17
+      xcode: latest
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Gerar build estático do Nuxt
+        script: |
+          npm run generate
+      - name: Sincronizar com Capacitor
+        script: |
+          npx cap sync android
+      - name: Build AAB para Play Store
+        script: |
+          cd android
+          ./gradlew clean
+          ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Workflow para build do iOS
+  ios-build:
+    name: iOS Build
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - codemagic
+      vars:
+        PACKAGE_NAME: "com.sygecom.srm"
+        APP_ID: 1234567890 # Configure seu App ID do App Store Connect
+        XCODE_WORKSPACE: "App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+        BUNDLE_ID: "com.sygecom.srm"
+      node: 20.11.0
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Executar lint
+        script: |
+          npm run lint || echo "Lint falhou, mas continuando..."
+      - name: Gerar build estático do Nuxt
+        script: |
+          npm run generate
+      - name: Sincronizar com Capacitor
+        script: |
+          npx cap sync ios
+      - name: Instalar pods do CocoaPods
+        script: |
+          cd ios/App
+          pod install
+      - name: Build do iOS
+        script: |
+          xcodebuild build \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination generic/platform=iOS \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO
+    artifacts:
+      - ios/App/build/**/*.ipa
+      - ios/App/build/**/*.app
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Workflow para build do Electron (Windows)
+  electron-windows:
+    name: Electron Windows Build
+    max_build_duration: 120
+    instance_type: windows_x2
+    environment:
+      groups:
+        - codemagic
+      vars:
+        PACKAGE_NAME: "com.sygecom.srm"
+      node: 20.11.0
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Instalar dependências do Electron
+        script: |
+          cd electron
+          npm ci
+      - name: Executar lint
+        script: |
+          npm run lint || echo "Lint falhou, mas continuando..."
+      - name: Gerar build estático do Nuxt
+        script: |
+          npm run generate
+      - name: Build do Electron
+        script: |
+          cd electron
+          npm run build
+          npm run electron:make
+    artifacts:
+      - electron/dist/**/*.exe
+      - electron/dist/**/*.zip
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Workflow para build do Electron (macOS)
+  electron-macos:
+    name: Electron macOS Build
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - codemagic
+      vars:
+        PACKAGE_NAME: "com.sygecom.srm"
+      node: 20.11.0
+      xcode: latest
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Instalar dependências do Electron
+        script: |
+          cd electron
+          npm ci
+      - name: Executar lint
+        script: |
+          npm run lint || echo "Lint falhou, mas continuando..."
+      - name: Gerar build estático do Nuxt
+        script: |
+          npm run generate
+      - name: Build do Electron
+        script: |
+          cd electron
+          npm run build
+          npm run electron:make
+    artifacts:
+      - electron/dist/**/*.dmg
+      - electron/dist/**/*.zip
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Workflow para testes e validação
+  test-and-validate:
+    name: Testes e Validação
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      groups:
+        - codemagic
+      node: 20.11.0
+    scripts:
+      - name: Instalar dependências
+        script: |
+          npm ci
+      - name: Executar lint
+        script: |
+          npm run lint
+      - name: Verificar formatação
+        script: |
+          npm run format:check
+      - name: Build de teste
+        script: |
+          npm run build
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: true

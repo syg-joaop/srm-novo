@@ -1,0 +1,139 @@
+curl --request POST \
+  --url https://vrp-api-zockb2v.cluster.vortus.solutions/api/v1/route \
+  --header 'Content-Type: application/json' \
+  --header 'accept: application/json' \
+  --header 'x-api-key: 85b95b01-c471-4566-8769-adfe00478afa' \
+  --data '{
+	"timezone": "America/Sao_Paulo",
+	"estimateTollsCosts": false,
+	"estimateFuelCosts": false,
+	"estimateKmCosts": false,
+	"estimateHourCosts": false,
+	"estimateTaskCosts": false,
+	"estimateRefuelLocation": false,
+	"showAllTollsOnRoute": false,
+	"showAllGasStationsOnRoute": false,
+	"showNearRefuelGasStationsOnRoute": false,
+	"showWazeLinksForEachTask": false,
+	"showHumanTime": false,
+	"maxDaysWorking": 1,
+	"vehicles": [
+		{
+			"id": 10,
+			"description": "AAA0001",
+			"maxVolumes": 100,
+			"maxSpeed": 100,
+			"avgSpeed": 80,
+			"maxJobs": 100,
+			"costs": {
+				"fuelType": "gasoline",
+				"axes": 6,
+				"avgCostsPerHour": 0,
+				"avgCostsPerKm": 0,
+				"avgLiterPerKm": 5.2,
+				"tankCapacityLiters": 300,
+				"tankCurrentLiters": 150
+			},
+			"skills": [
+				"a"
+			],
+			"location": {
+				"start": {
+					"fullAddress": "rua clelia dini, 100 - itapira - brazil"
+				},
+				"end": {
+					"latitude": -22.4361,
+					"longitude": -46.8217
+				}
+			},
+			"break": {
+				"duration": "01:00",
+				"window": {
+					"start": "11:00",
+					"end": "13:00"
+				}
+			},
+			"work": {
+				"start": "08:00",
+				"end": "18:00"
+			}
+		}
+	],
+	"tasks": [
+		{
+			"id": 23982,
+			"type": "catch-only",
+			"description": "Pedido 0129202",
+			"preparation": "00:05",
+			"duration": "00:10",
+			"window": {
+				"start": "10:00",
+				"end": "15:00"
+			},
+			"skills": [
+				"a"
+			],
+			"loadVolumes": 10,
+			"priority": 0,
+			"location": {
+				"fullAddress": "Rua Jose Bonifacio, 231, centro, itapira/sp"
+			}
+		}
+	]
+}'
+
+curl -X 'POST' \
+  'https://vrp-api-zockb2v.cluster.vortus.solutions/swagger/api/v1/snap' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "geometry": {
+          "type": "object",
+          "description": "Geometria GeoJSON do tipo LineString",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "LineString"
+              ]
+            },
+            "coordinates": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}'
+
+Response:
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "description": "Geometria GeoJSON da rota ajustada"
+    }
+  ]
+}
+
+
+curl -X 'POST' \
+  'https://vrp-api-zockb2v.cluster.vortus.solutions/swagger/api/v1/sequence-to-polygon' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "sequence": "any"
+}'

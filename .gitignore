@@ -1,0 +1,173 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+build_log.txt
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+dist-ssr
+.output
+.nitro
+.cache
+
+# Nuxt
+.nuxt
+.nuxt/
+.nuxt/**
+.nuxtrc
+.nuxtrc.*
+nuxt.d.ts
+.nitro/
+.nitro/**
+.output/
+.output/**
+.vite/
+.vite/**
+*.nuxt.*
+.nuxtignore
+
+# Environment variables
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+.claude/settings.local.json
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Windows
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript
+*.tsbuildinfo
+*.js.map
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Generated files (compiled from TypeScript)
+app.vue.js
+vite.config.d.ts
+nuxt.d.ts
+
+# Vite cache
+node_modules/.vite
+.vite
+
+# Capacitor
+.capacitor
+android/.gradle
+android/app/build
+android/build
+ios/Pods
+ios/build
+ios/*.xcworkspace/xcuserdata
+ios/*.xcodeproj/xcuserdata
+ios/*.xcodeproj/project.xcworkspace/xcuserdata
+
+# Electron
+electron/dist
+electron/release
+electron/src/**/*.js
+electron/live-runner.js
+
+# Temporary files
+dashboard.json
+*.temp
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+*.pem
+.cache
+
+# Agent tooling (local)
+.agent/
+.claude/
+GEMINI.md
+
+# ESLint/Prettier cache
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Bundle analyzer
+stats.html
+report.html
+*.stats.json
+
+# Service Worker (generated)
+public/sw.js
+public/workbox-*.js
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Storybook
+storybook-static/
+
+# Generated types
+*.generated.ts
+*.generated.d.ts
+auto-imports.d.ts
+components.d.ts
+
+# Vitest
+vitest.config.ts.timestamp-*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Stores
+stores/*.json
+!stores/.gitkeep

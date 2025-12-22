@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --sidebar-width: 250px;
+  --sidebar-width-collapsed: 64px;
+  --header-height: 60px;
+
+  /* Default to Dark Mode */
+  --color-primary: #0099ff;
+  --color-primary-dark: #0077be;
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #ffffff;
+  --color-text-muted: #aaaaaa;
+  --color-border: #333333;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-hover: rgba(255, 255, 255, 0.1);
+
+  /* Status Colors */
+  --color-status-finalizado: #4ade80;
+  --color-status-acompanhamento: #fbbf24;
+  --color-status-pendente: #f87171;
+  --color-status-vencido: #ef4444;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-success-soft: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.1);
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.1);
+
+  /* Interactive */
+  --color-primary-soft: rgba(0, 153, 255, 0.1);
+  --color-primary-border: rgba(0, 153, 255, 0.3);
+}
+
+[data-theme="light"] {
+  --color-primary-dark: #0066aa;
+  --color-background: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-text: #333333;
+  --color-text-muted: #666666;
+  --color-border: #e0e0e0;
+  --color-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-hover: rgba(0, 0, 0, 0.05);
+
+  /* Semantic Colors - Light */
+  --color-success: #10b981;
+  --color-success-soft: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.1);
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.1);
+
+  /* Interactive - Light */
+  --color-primary-soft: rgba(0, 153, 255, 0.05);
+  --color-primary-border: rgba(0, 153, 255, 0.3);
+}
+
+html,
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
+  overflow-y: auto;
+  /* Allow vertical scroll */
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}

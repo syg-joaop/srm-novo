@@ -1,0 +1,44 @@
+@import "./scrollbar.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+[data-theme="dark"] .surface-bg {
+  background-color: var(--color-surface) !important;
+}
+
+[data-theme="dark"] .surface-bg-50 {
+  background-color: var(--color-surface);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .background-bg-50 {
+  background-color: var(--color-background);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .background-bg-30 {
+  background-color: var(--color-background);
+  opacity: 0.3;
+}

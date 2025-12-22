@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SRM</string>
+    <string name="title_activity_main">SRM</string>
+    <string name="package_name">com.sygecom.srm</string>
+    <string name="custom_url_scheme">com.sygecom.srm</string>
+</resources>

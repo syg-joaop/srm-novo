@@ -1,0 +1,8 @@
+{
+  "appId": "com.sygecom.srm",
+  "appName": "SRM",
+  "webDir": ".output/public",
+  "server": {
+    "androidScheme": "https"
+  }
+}

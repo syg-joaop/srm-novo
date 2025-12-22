@@ -1,71 +1,64 @@
-# Configuração do Codemagic para SRM App - iOS Build
-#
-# Este arquivo contém workflow para build do iOS
-#
-# IMPORTANTE: Configure as variáveis de ambiente no painel do Codemagic:
-# - API_SECRET
-# - API_LOGIN
-# - API_URL
-# - API_URL_HOMOL
-# - NUXT_PUBLIC_API_SECRET
-# - NUXT_PUBLIC_APP_NAME
-# - NUXT_PUBLIC_APP_VERSION
-# - E outras variáveis necessárias
-#
-# Para configurar variáveis:
-# 1. Acesse o painel do Codemagic
-# 2. Vá em "Teams" > "Environment variables"
-# 3. Crie um grupo chamado "codemagic" ou use o grupo padrão
-# 4. Adicione as variáveis necessárias
-
 workflows:
-  # Workflow para build do iOS
   ios-build:
-    name: iOS Build
+    name: iOS Build (IPA - Local Install)
     max_build_duration: 120
     instance_type: mac_mini_m1
+
     environment:
       groups:
         - codemagic
       vars:
-        PACKAGE_NAME: "com.sygecom.srm"
-        APP_ID: 1234567890 # Configure seu App ID do App Store Connect
-        XCODE_WORKSPACE: "App/App.xcworkspace"
-        XCODE_SCHEME: "App"
         BUNDLE_ID: "com.sygecom.srm"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+        EXPORT_METHOD: "development" # development ou ad-hoc
       node: 20.11.0
       xcode: latest
       cocoapods: default
+
     scripts:
       - name: Instalar dependências
         script: |
           npm ci
+
       - name: Gerar build estático do Nuxt
         script: |
           npm run generate
-      - name: Sincronizar com Capacitor
+
+      - name: Sincronizar Capacitor iOS
         script: |
           npx cap sync ios
-      - name: Instalar pods do CocoaPods
+
+      - name: Instalar CocoaPods
         script: |
           cd ios/App
           pod install
-      - name: Build do iOS
+
+      - name: Archive iOS (gera .xcarchive)
         script: |
-          xcodebuild build \
+          xcodebuild archive \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -destination generic/platform=iOS \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO
+            -archivePath build/App.xcarchive \
+            CODE_SIGN_STYLE=Automatic
+
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist ios/exportOptions.plist \
+            -exportPath build/ipa
+
     artifacts:
-      - ios/App/build/**/*.ipa
-      - ios/App/build/**/*.app
+      - build/ipa/*.ipa
+      - build/App.xcarchive
+
     publishing:
       email:
         recipients:
-          - user@example.com # Configure seu email para notificações
+          - user@example.com
         notify:
           success: true
           failure: false

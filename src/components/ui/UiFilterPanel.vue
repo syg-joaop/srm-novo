@@ -154,11 +154,11 @@
 import { Filter, X } from "lucide-vue-next";
 import UiSegmentedControl from "~/components/ui/UiSegmentedControl.vue";
 import UiSelect from "~/components/ui/UiSelect.vue";
-import { getActiveFiltersCount, type FilterConfig } from "~/utils/filterPanel";
+import { getActiveFiltersCount, type UiFilterConfig } from "~/utils/filterPanel";
 
 interface Props {
   modelValue: Record<string, string>;
-  filters: FilterConfig[];
+  filters: UiFilterConfig[];
   columns?: number;
   inputColumns?: number;
   open?: boolean;

@@ -1,4 +1,4 @@
-﻿export interface FilterConfig<T> {
+﻿export interface ListFilterConfig<T> {
   searchFields?: (keyof T)[];
   customFilters?: (item: T) => boolean;
   sortCompare?: (a: T, b: T) => number;
@@ -6,7 +6,7 @@
 
 export function useListFilter<T>(
   items: Ref<T[] | undefined | null>,
-  config: MaybeRef<FilterConfig<T>>,
+  config: MaybeRef<ListFilterConfig<T>>,
 ) {
   const search = ref("");
 

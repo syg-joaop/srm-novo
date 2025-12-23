@@ -8,7 +8,7 @@ export interface FilterOption {
 
 export type FilterType = "select" | "input" | "button-group" | "segmented";
 
-export interface FilterConfig {
+export interface UiFilterConfig {
   key: string;
   label?: string;
   type: FilterType;
@@ -22,7 +22,7 @@ export interface FilterConfig {
 }
 
 export const getActiveFiltersCount = (
-  filters: FilterConfig[] | undefined,
+  filters: UiFilterConfig[] | undefined,
   modelValue: Record<string, any> | undefined,
 ): number => {
   if (!filters || filters.length === 0) return 0;

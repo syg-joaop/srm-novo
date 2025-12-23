@@ -70,13 +70,13 @@
 <script setup lang="ts">
 import { Filter, Search } from "lucide-vue-next";
 import UiFilterPanel from "~/components/ui/UiFilterPanel.vue";
-import { getActiveFiltersCount, type FilterConfig } from "~/utils/filterPanel";
+import { getActiveFiltersCount, type UiFilterConfig } from "~/utils/filterPanel";
 
 interface Props {
   search: string;
   searchPlaceholder?: string;
   filters: Record<string, any>;
-  filterItems: FilterConfig[];
+  filterItems: UiFilterConfig[];
   filterColumns?: number;
   inputColumns?: number;
 }

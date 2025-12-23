@@ -53,6 +53,7 @@ module.exports = {
     "plugin:vue/vue3-essential",
     "plugin:@typescript-eslint/recommended",
     "prettier",
+    "plugin:storybook/recommended"
   ],
 
   rules: {

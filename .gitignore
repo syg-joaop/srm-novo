@@ -171,3 +171,5 @@ pids
 # Stores
 stores/*.json
 !stores/.gitkeep
+
+*storybook.log

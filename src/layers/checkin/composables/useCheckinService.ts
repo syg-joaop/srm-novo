@@ -1,5 +1,5 @@
 ﻿import type { CheckinFilters, PaginatedCheckinResponse } from "../checkin.types";
-import { schemaPaginatedCheckinResponse } from "~/server/schemas/checkin.schema";
+import { schemaPaginatedCheckinResponse } from "~/layers/checkin/schemas/checkin.schema";
 
 const CHECKINS_LIST_ENDPOINT = "/sygecom/chameleon-mode/SRM_GET_CHECKIN";
 

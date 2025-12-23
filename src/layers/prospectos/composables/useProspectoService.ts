@@ -1,5 +1,5 @@
 ﻿import type { ProspectoFilters, ProspectoResponse } from "../prospecto.types";
-import { schemaProspectoResponse } from "~/server/schemas/prospectos.schema";
+import { schemaProspectoResponse } from "~/layers/prospectos/schemas/prospectos.schema";
 
 const PROSPECTOS_LIST_ENDPOINT = "/sygecom/chameleon-mode/SRM_GET_PROSPECTO";
 

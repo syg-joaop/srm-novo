@@ -3,7 +3,7 @@
   schemaRotaResponse,
   schemaRoteiro,
   schemaRoteiroResponse,
-} from "~/server/schemas/rotas.schema";
+} from "~/layers/rotas/schemas/rotas.schema";
 import { isValidCoordinate } from "~/utils/validators/geo";
 import type {
   CreateRoteiroPayload,

@@ -119,7 +119,7 @@ export const DEFAULT_TABS: TabOption[] = [
 <script setup lang="ts" generic="T = unknown">
 import { ChevronLeft, ChevronRight, Inbox } from "lucide-vue-next";
 import UiSegmentedControl from "~/components/ui/UiSegmentedControl.vue";
-import type { TabOption } from "~/types/dashboard";
+import type { TabOption } from "~/layers/painel/types/dashboard";
 
 const emit = defineEmits<{
   (e: "update:activeTab", value: string): void;

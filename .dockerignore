@@ -1,0 +1,44 @@
+# Dependências
+node_modules
+npm-debug.log
+package-lock.json
+
+# Build outputs
+.output
+.nuxt
+dist
+storybook-static
+
+# Desenvolvimento
+.git
+.gitignore
+.vscode
+.idea
+
+# Electron
+electron
+android
+ios
+
+# Testes e documentação
+*.md
+AGENTS.md
+offline.md
+regras-srm.MD
+README.md
+
+# Arquivos temporários
+*.log
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração local
+.env
+.env.local
+.env.*.local
+
+# Outros
+teste.html
+rotas-polyline.txt
+roteirizar.js
+codemagic.yaml

@@ -1,55 +1,52 @@
 ﻿<template>
   <UiModal v-model="isOpen" size="medium" :show-close="true">
     <template #title>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 text-[var(--font-size-md)] font-[var(--font-weight-semibold)] text-[var(--color-text)]">
         <Route class="w-5 h-5 text-[var(--color-primary)]" />
         <span>Adicionar à Rota</span>
       </div>
     </template>
 
     <div class="flex flex-col gap-4">
-      <!-- Info do fornecedor -->
       <div
         v-if="fornecedor"
         class="flex items-center gap-3 p-3 rounded-lg bg-[var(--color-primary-soft)] border border-[var(--color-primary-border)]"
       >
         <div
-          class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center"
+          class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-text)]"
         >
-          <Building2 class="w-5 h-5 text-white" />
+          <Building2 class="w-5 h-5" />
         </div>
         <div class="flex-1 min-w-0">
-          <div class="font-semibold text-[var(--color-text)] truncate">
+          <div class="font-[var(--font-weight-semibold)] text-[var(--color-text)] text-[var(--font-size-sm)] truncate">
             {{ fornecedor.fanta || fornecedor.fornecedor }}
           </div>
-          <div class="text-xs text-[var(--color-text-muted)] truncate">
+          <div class="text-[var(--font-size-xs)] text-[var(--color-text-muted)] truncate">
             {{ fornecedor.cidade }} - {{ fornecedor.uf }} | {{ fornecedor.ende }}
           </div>
         </div>
         <div class="flex-shrink-0">
           <span
             v-if="hasValidCoordinates"
-            class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            class="text-[var(--font-size-xs)] px-2 py-1 rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)]"
           >
             Com GPS
           </span>
           <span
             v-else
-            class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+            class="text-[var(--font-size-xs)] px-2 py-1 rounded-full bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
           >
             Sem GPS
           </span>
         </div>
       </div>
 
-      <!-- Loading -->
       <div v-if="isLoadingRotas" class="flex items-center justify-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
       </div>
 
-      <!-- Lista de rotas -->
       <div v-else-if="rotas.length > 0" class="flex flex-col gap-2">
-        <label class="text-sm font-semibold text-[var(--color-text)]">
+        <label class="text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-[var(--color-text)]">
           Selecione uma rota:
         </label>
         <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
@@ -65,32 +62,31 @@
             @click="selectedRota = rota"
           >
             <div
-              class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+              class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-[var(--color-text)]"
               :class="getStatusBgClass(rota.status)"
             >
-              <Route class="w-5 h-5 text-white" />
+              <Route class="w-5 h-5" />
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-medium text-[var(--color-text)] truncate">
+              <div class="font-[var(--font-weight-medium)] text-[var(--color-text)] text-[var(--font-size-sm)] truncate">
                 Rota #{{ rota.codigo || rota.id }}
               </div>
-              <div class="text-xs text-[var(--color-text-muted)]">
+              <div class="text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
                 {{ formatDateRange(rota.data_inicio, rota.data_fim) }}
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
               <span
-                class="text-xs px-2 py-0.5 rounded-full"
+                class="text-[var(--font-size-xs)] px-2 py-0.5 rounded-full"
                 :class="getStatusBadgeClass(rota.status)"
               >
                 {{ getStatusLabel(rota.status) }}
               </span>
-              <span v-if="rota.progresso" class="text-xs text-[var(--color-text-muted)]">
+              <span v-if="rota.progresso" class="text-[var(--font-size-xs)] text-[var(--color-text-muted)]">
                 {{ rota.progresso.total }} pontos
               </span>
             </div>
 
-            <!-- Radio indicator -->
             <div class="flex-shrink-0">
               <div
                 class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
@@ -100,33 +96,31 @@
                     : 'border-[var(--color-border)]'
                 "
               >
-                <Check v-if="selectedRota?.id === rota.id" class="w-3 h-3 text-white" />
+                <Check v-if="selectedRota?.id === rota.id" class="w-3 h-3 text-[var(--color-text)]" />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Empty state -->
       <div
         v-else
         class="flex flex-col items-center justify-center py-8 text-[var(--color-text-muted)]"
       >
         <Route class="w-12 h-12 opacity-50 mb-2" />
-        <p class="text-sm">Nenhuma rota disponível</p>
-        <p class="text-xs">Crie uma rota primeiro para adicionar fornecedores</p>
+        <p class="text-[var(--font-size-sm)]">Nenhuma rota disponível</p>
+        <p class="text-[var(--font-size-xs)]">Crie uma rota primeiro para adicionar fornecedores</p>
       </div>
 
-      <!-- Observação -->
       <div v-if="selectedRota" class="flex flex-col gap-1.5">
-        <label class="text-sm font-semibold text-[var(--color-text)]">
+        <label class="text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-[var(--color-text)]">
           Observação (opcional)
         </label>
         <textarea
           v-model="observacao"
           placeholder="Adicione uma observação para este ponto..."
           rows="2"
-          class="w-full px-3 py-2.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none transition-colors resize-none"
+          class="w-full px-3 py-2.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--font-size-sm)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none transition-colors resize-none"
         />
       </div>
     </div>
@@ -198,7 +192,7 @@ const carregarRotas = async () => {
     if (response?.data) {
       // Filtra apenas rotas não concluídas/canceladas
       rotas.value = response.data.filter(
-        (r) => !["concluida", "cancelada"].includes(r.status?.toLowerCase() || "")
+        (r) => !["concluida", "cancelada"].includes(r.status?.toLowerCase() || ""),
       );
     }
   } catch (error) {
@@ -309,12 +303,12 @@ const getStatusLabel = (status?: string): string => {
  */
 const getStatusBgClass = (status?: string): string => {
   const map: Record<string, string> = {
-    aguardando: "bg-gray-500",
-    em_andamento: "bg-blue-500",
-    concluida: "bg-green-500",
-    cancelada: "bg-red-500",
+    aguardando: "bg-[var(--color-warning)]",
+    em_andamento: "bg-[var(--color-primary)]",
+    concluida: "bg-[var(--color-success)]",
+    cancelada: "bg-[var(--color-danger)]",
   };
-  return map[status?.toLowerCase() || ""] || "bg-gray-500";
+  return map[status?.toLowerCase() || ""] || "bg-[var(--color-text-muted)]";
 };
 
 /**
@@ -322,12 +316,12 @@ const getStatusBgClass = (status?: string): string => {
  */
 const getStatusBadgeClass = (status?: string): string => {
   const map: Record<string, string> = {
-    aguardando: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-    em_andamento: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-    concluida: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-    cancelada: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+    aguardando: "bg-[var(--color-warning-soft)] text-[var(--color-warning)]",
+    em_andamento: "bg-[var(--color-primary-soft)] text-[var(--color-primary)]",
+    concluida: "bg-[var(--color-success-soft)] text-[var(--color-success)]",
+    cancelada: "bg-[var(--color-danger-soft)] text-[var(--color-danger)]",
   };
-  return map[status?.toLowerCase() || ""] || map.aguardando;
+  return map[status?.toLowerCase() || ""] || "bg-[var(--color-border-subtle)] text-[var(--color-text-muted)]";
 };
 
 // Carrega rotas quando modal abre
@@ -339,6 +333,6 @@ watch(
     } else {
       resetForm();
     }
-  }
+  },
 );
 </script>

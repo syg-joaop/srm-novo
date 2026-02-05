@@ -437,8 +437,8 @@ import {
   Target,
   Users,
 } from "lucide-vue-next";
-import type { AniversarianteItem, Atendente, AtendenteItem } from "../dashboard.types";
 import { useDashboardCharts } from "../composables/useDashboardCharts";
+import type { AniversarianteItem, Atendente, AtendenteItem } from "../dashboard.types";
 import { useDashboardStore } from "../stores/dashboard";
 definePageMeta({
   layout: "default",
@@ -514,9 +514,7 @@ const mapResumoMetrics = (items: { label: string; value: string | number }[]) =>
 const comprasMetricsMes = computed(() => mapResumoMetrics(comprasMes.value));
 const comprasMetricsMesAnterior = computed(() => mapResumoMetrics(comprasMesAnterior.value));
 
-const { lineChartRef, barChartRef, discountChartRef, initCharts } = useDashboardCharts(
-  chartData,
-);
+const { lineChartRef, barChartRef, discountChartRef, initCharts } = useDashboardCharts(chartData);
 
 watch(
   data,
@@ -530,7 +528,6 @@ watch(
   },
   { immediate: true },
 );
-
 </script>
 
 <style scoped></style>

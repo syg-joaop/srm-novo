@@ -1,8 +1,5 @@
 ﻿<template>
-  <div
-    class="h-[600px] w-full rounded-xl overflow-hidden border"
-    style="border-color: var(--color-border)"
-  >
+  <div class="h-[600px] w-full rounded-xl overflow-hidden border border-[var(--color-border)]">
     <UiMapaPontos :pontos="pontos" :status-config="statusConfig" />
   </div>
 </template>
@@ -32,7 +29,7 @@ const pontos = computed<UiMapaPonto[]>(() => {
       longitude: f.longitude,
       linhas: [
         { rotulo: "Cidade", valor: f.cidade },
-        { rotulo: "Última carga", valor: f.ultima_carga },
+        { rotulo: "Ultima carga", valor: f.ultima_carga },
       ],
     }));
 });

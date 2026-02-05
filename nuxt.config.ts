@@ -58,7 +58,8 @@ export default defineNuxtConfig({
     apiV2UrlHomol: process.env.API_URL_HOMOL,
     public: {
       apiBaseUrl: process.env.API_LOGIN ?? "",
-      apiSecret: process.env.NUXT_PUBLIC_API_SECRET ?? "",
+      // Usa NUXT_PUBLIC_API_SECRET se disponível, senão usa API_SECRET como fallback
+      apiSecret: process.env.NUXT_PUBLIC_API_SECRET ?? process.env.API_SECRET ?? "",
       apiV2Url: process.env.API_URL ?? "",
       apiV2UrlHomol: process.env.API_URL_HOMOL ?? "",
       appName: process.env.NUXT_PUBLIC_APP_NAME ?? "SRM App",

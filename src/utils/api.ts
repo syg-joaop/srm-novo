@@ -1,5 +1,3 @@
-import type { $Fetch } from "ofetch";
-
 const AUTH_STORAGE_KEY = "srm_auth_user";
 
 const readTokenFromStorage = (): string | null => {
@@ -18,7 +16,7 @@ const readTokenFromStorage = (): string | null => {
 const createApiClient = (
   baseURL: string,
   options?: { token?: string; secret?: string },
-): $Fetch => {
+) => {
   if (!baseURL) {
     throw new Error("API baseURL nao configurada.");
   }
@@ -52,16 +50,18 @@ export const useMainApi = (homol?: boolean) => {
   const config = useRuntimeConfig();
   const token = readTokenFromStorage();
   const baseURL = homol ? config.public.apiV2UrlHomol : config.public.apiV2Url;
+  const secret = config.public.apiSecret?.trim();
 
   return createApiClient(baseURL, {
     token: token ?? undefined,
-    secret: config.public.apiSecret || undefined,
+    secret: secret && secret.length > 0 ? secret : undefined,
   });
 };
 
 export const useAuthApi = () => {
   const config = useRuntimeConfig();
+  const secret = config.public.apiSecret?.trim();
   return createApiClient(config.public.apiBaseUrl, {
-    secret: config.public.apiSecret || undefined,
+    secret: secret && secret.length > 0 ? secret : undefined,
   });
 };

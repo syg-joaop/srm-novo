@@ -252,10 +252,14 @@ export const sequencia = computed(() => {
 
 /* ---------- ações ---------- */
 
+/** Ouvintes chamados a cada dose registrada (usado pelas animações). */
+export const ouvintesDose = new Set<(dose: Dose) => void>()
+
 export function registrarDose(med: Medicacao, em = new Date(), comAlimento = false, doseMg = med.doseMg) {
   const dose: Dose = { id: uid(), medId: med.id, em: em.toISOString(), doseMg, comAlimento }
   estado.doses.push(dose)
   agendarPergunta(med, dose)
+  for (const f of ouvintesDose) f(dose)
   return dose
 }
 

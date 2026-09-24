@@ -7,6 +7,7 @@ Vem configurado com **Lyberdia 30 mg** (lisdexanfetamina, TDAH) e **Bupropiona 1
 ## O que ele faz
 
 - **Hoje**: cartões com a fase atual de cada medicação (absorção → início → subida → pico → ativo → queda), contagem até o próximo marco e nível em % do pico habitual (uso contínuo).
+- **Seu organismo (3D)**: cena em Three.js no topo da tela. Um núcleo vivo (shader com ruído e borda iridescente) é cercado por uma órbita de partículas para cada remédio. A quantidade, a velocidade e o brilho das partículas acompanham o nível na hora escolhida no relógio, e registrar uma dose dispara uma explosão de partículas na cor do remédio. Arraste para girar; o mouse gera paralaxe.
 - **Seu dia, hora a hora**: relógio de 24 h interativo. Arraste o ponteiro ou aperte play para ver o dia se desenrolar: cada remédio é um anel cuja espessura acompanha o nível no sangue, partículas orbitam conforme a intensidade, o céu do fundo muda com a hora, e um narrador conta cada evento (dose, janela de início, pico, queda, seus registros, sono). A reprodução desacelera nos eventos; dá para escolher 1×/2×/4× e rever qualquer um dos últimos 7 dias. Abaixo, uma faixa de 24 horas sincronizada com o relógio.
 - **"Já sentiu?"**: quando a medicação entra na janela de início, o app pergunta se você já sentiu o efeito. Cada resposta vira um dado do seu **tempo de início pessoal**, e as previsões seguintes passam a usar esse tempo.
 - **Calendário interativo**: navegação por mês com animação (setas, botão Hoje, arrastar no celular e teclado). Pontos mostram doses tomadas e perdidas, ✨ marca os dias com início registrado e há modos de mapa de calor para humor, foco e energia. Ao tocar num dia aparecem a curva, as doses e os registros daquele dia, e dá para lançar doses ou efeitos retroativos.
@@ -20,6 +21,12 @@ Vem configurado com **Lyberdia 30 mg** (lisdexanfetamina, TDAH) e **Bupropiona 1
 Modelo de 1 compartimento com absorção de 1ª ordem (função de Bateman), com o `ka` resolvido a partir do `tmax` de referência e o `ke` a partir da meia-vida. Formulações bifásicas (Ritalina LA, Concerta) usam mais de um pulso de liberação. Doses repetidas se somam por superposição, por isso a bupropiona mostra o acúmulo até o equilíbrio (~8 dias). As janelas de efeito percebido (início, pico, duração) vêm de bula e literatura, são deslocadas pela refeição e, quando há registros, pelo seu início pessoal (mediana).
 
 > ⚠️ Ferramenta educativa e de acompanhamento. As curvas são estimativas e não substituem orientação médica. Nunca ajuste doses por conta própria.
+
+## Animações
+
+- **Three.js**: cena 3D do organismo (`src/lib/cena3d.ts`), carregada sob demanda num chunk separado; pausa fora da tela, respeita `prefers-reduced-motion` e tem fallback sem WebGL.
+- **GSAP + ScrollTrigger**: título revelado palavra por palavra, entradas em cascata, revelação ao rolar, contadores numéricos e botões magnéticos (`v-magnetico`), em `src/lib/movimento.ts`.
+- **Lenis**: rolagem suave com inércia em desktop (desativada em toque e em movimento reduzido).
 
 ## Rodando
 

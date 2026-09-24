@@ -22,7 +22,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', tecla))
         </div>
         <button class="btn btn-icon btn-sm btn-ghost fechar" aria-label="Fechar" @click="emit('fechar')"><X :size="17" /></button>
       </header>
-      <div class="conteudo">
+      <div class="conteudo" data-lenis-prevent>
         <slot />
       </div>
       <footer v-if="$slots.rodape" class="row">

@@ -567,3 +567,32 @@ label {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- tipografia animada ---------- */
+.palavra {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+.palavra > span {
+  display: inline-block;
+  transform-origin: 0 100%;
+  will-change: transform;
+}
+
+/* ---------- Lenis ---------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

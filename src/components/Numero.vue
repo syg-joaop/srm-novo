@@ -1,27 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, reactive, watch } from 'vue'
+import { gsap, movimentoReduzido } from '../lib/movimento'
 
-const props = withDefaults(defineProps<{ valor: number; casas?: number; duracaoMs?: number }>(), { casas: 0, duracaoMs: 900 })
-const exibido = ref(0)
+const props = withDefaults(defineProps<{ valor: number; casas?: number; duracao?: number }>(), { casas: 0, duracao: 1.2 })
+const estado = reactive({ v: 0 })
 
-function animar(de: number, ate: number) {
-  const inicio = performance.now()
-  const passo = (t: number) => {
-    const p = Math.min(1, (t - inicio) / props.duracaoMs)
-    const e = 1 - Math.pow(1 - p, 3)
-    exibido.value = de + (ate - de) * e
-    if (p < 1) requestAnimationFrame(passo)
+function animar(ate: number) {
+  if (movimentoReduzido()) {
+    estado.v = ate
+    return
   }
-  requestAnimationFrame(passo)
+  gsap.to(estado, { v: ate, duration: props.duracao, ease: 'expo.out', overwrite: true })
 }
 
-onMounted(() => animar(0, props.valor))
-watch(
-  () => props.valor,
-  (novo, antigo) => animar(antigo ?? 0, novo),
-)
+onMounted(() => animar(props.valor))
+watch(() => props.valor, animar)
 </script>
 
 <template>
-  <span class="tabular">{{ exibido.toFixed(casas).replace('.', ',') }}</span>
+  <span class="tabular">{{ estado.v.toFixed(casas).replace('.', ',') }}</span>
 </template>

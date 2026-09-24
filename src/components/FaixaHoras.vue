@@ -43,7 +43,7 @@ watch(horaAtiva, (h) => {
 </script>
 
 <template>
-  <div ref="caixa" class="faixa">
+  <div ref="caixa" class="faixa" data-lenis-prevent>
     <div class="grade">
       <span class="canto" />
       <button

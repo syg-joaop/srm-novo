@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Pill, Sparkles, NotebookPen, Utensils } from 'lucide-vue-next'
 import MedIcone from './MedIcone.vue'
+import Numero from './Numero.vue'
 import { agora, type StatusMed } from '../store'
 import { chaveDia, duracao, hhmm, HORA } from '../lib/datas'
 import { nivelHabitual, ROTULO_FASE, type Fase } from '../lib/farmaco'
@@ -107,7 +108,7 @@ const vivo = computed(() => s.value.fase === 'janela' || s.value.fase === 'pico'
         </div>
       </Transition>
       <div class="nivel">
-        <span class="mono tabular">{{ pctHabitual }}<small>%</small></span>
+        <span class="mono tabular"><Numero :valor="pctHabitual" /><small>%</small></span>
         <span class="tiny faint">do pico habitual</span>
       </div>
     </div>

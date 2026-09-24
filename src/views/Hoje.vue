@@ -2,9 +2,12 @@
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 import { BellRing, ChevronRight, Crosshair, Pause, Pill, Play, RotateCcw, Sparkles, Trash2 } from 'lucide-vue-next'
 import CartaoMed from '../components/CartaoMed.vue'
+import Organismo3D from '../components/Organismo3D.vue'
 import FaixaHoras from '../components/FaixaHoras.vue'
 import RelogioDia from '../components/RelogioDia.vue'
-import { roteiroDoDia, seriesDoDia, type EventoDia } from '../dia'
+import { roteiroDoDia, seriesDoDia, valorEm, type EventoDia } from '../dia'
+import { nivelHabitual } from '../lib/farmaco'
+import { animarPalavras, cascata, revelarAoRolar } from '../lib/movimento'
 import { adesaoDoDia, agora, avisar, dosesDoDia, estado, medsAtivas, registrarEfeito, removerDose, removerEfeito, sequencia, statusDe, type StatusMed } from '../store'
 import { chaveDia, dataLonga, deChave, deMinutos, DIAS_SEMANA_CURTO, duracao, HORA, saudacao, somarDias } from '../lib/datas'
 import { ceu, ui } from '../ui'
@@ -158,10 +161,33 @@ watch(dia, () => {
   }
 })
 
+/* ---------- cena 3D e entrada ---------- */
+
+const medsCena = computed(() =>
+  series.value.map((s) => ({ id: s.med.id, cor: s.med.cor, nivel: valorEm(s.pontos, hora.value) / nivelHabitual(s.perfil) })),
+)
+
+const raiz = ref<HTMLElement | null>(null)
+const titulo = ref<HTMLElement | null>(null)
+const cartoes = ref<HTMLElement | null>(null)
+let desfazerRevelar = () => {}
+
+const palavrasTitulo = computed(() => {
+  const nome = estado.preferencias.nome ? `, ${estado.preferencias.nome}` : ''
+  return `${saudacao(new Date(agora.value))}${nome}.`.split(' ')
+})
+
 onMounted(() => {
   hora.value = 0
-  irPara(horaAgora.value ?? 12, 1800)
+  irPara(horaAgora.value ?? 12, 2200)
+  if (titulo.value) animarPalavras(titulo.value, 0.1)
+  if (raiz.value) {
+    cascata(raiz.value.querySelectorAll('.hero .cascata'), 0.35)
+    desfazerRevelar = revelarAoRolar(raiz.value)
+  }
+  if (cartoes.value) cascata([...cartoes.value.children], 0.55)
 })
+onBeforeUnmount(() => desfazerRevelar())
 onActivated(() => {
   if (ehHoje.value && horaAgora.value != null && !tocando.value && Math.abs(hora.value - horaAgora.value) > 0.2) irPara(horaAgora.value)
 })
@@ -218,26 +244,40 @@ const ROTULO_TIPO: Record<string, string> = {
 </script>
 
 <template>
-  <div class="hoje">
+  <div ref="raiz" class="hoje">
     <!-- cabeçalho -->
     <section class="hero">
       <div class="hero-texto">
-        <p class="eyebrow entrar">{{ dataLonga(agora) }}</p>
-        <h1 class="display entrar" style="animation-delay: 0.05s">
-          {{ saudacao(new Date(agora)) }}<template v-if="estado.preferencias.nome">, {{ estado.preferencias.nome }}</template>.
+        <p class="eyebrow cascata">{{ dataLonga(agora) }}</p>
+        <h1 ref="titulo" class="display" :aria-label="palavrasTitulo.join(' ')">
+          <template v-for="(p, i) in palavrasTitulo" :key="i"><span class="palavra" aria-hidden="true"><span>{{ p }}</span></span>{{ ' ' }}</template>
         </h1>
         <Transition name="troca" mode="out-in">
-          <p :key="resumo" class="resumo muted">{{ resumo }}</p>
+          <p :key="resumo" class="resumo muted cascata">{{ resumo }}</p>
         </Transition>
-        <div class="row wrap metas entrar" style="animation-delay: 0.15s">
+        <div class="row wrap metas cascata">
           <span class="chip"><Pill :size="13" /> {{ adesao.tomadas }} de {{ adesao.planejadas }} doses hoje</span>
           <span v-if="sequencia" class="chip sequencia">{{ sequencia }} {{ sequencia === 1 ? 'dia' : 'dias' }} em sequência</span>
         </div>
+        <div class="acoes cascata">
+          <button v-magnetico="0.25" class="btn btn-primary grande" @click="ui.modalDose = {}"><Pill :size="18" /> Registrar dose</button>
+          <button v-magnetico="0.25" class="btn grande" @click="ui.modalEfeito = {}"><Sparkles :size="18" /> Senti o efeito</button>
+        </div>
       </div>
-      <div class="acoes entrar" style="animation-delay: 0.2s">
-        <button class="btn btn-primary grande" @click="ui.modalDose = {}"><Pill :size="18" /> Registrar dose</button>
-        <button class="btn grande" @click="ui.modalEfeito = {}"><Sparkles :size="18" /> Senti o efeito</button>
-      </div>
+
+      <Organismo3D :meds="medsCena" class="cena">
+        <div class="cena-legenda">
+          <span class="eyebrow">Seu organismo · {{ deMinutos(hora * 60) }}</span>
+          <div class="row wrap" style="gap: 6px 12px">
+            <span v-for="m in medsCena" :key="m.id" class="tiny row" style="gap: 6px">
+              <i class="ponto-cor" :style="{ background: m.cor, boxShadow: `0 0 10px ${m.cor}` }" />
+              {{ series.find((s) => s.med.id === m.id)?.med.nome }}
+              <span class="mono faint">{{ Math.round(m.nivel * 100) }}%</span>
+            </span>
+          </div>
+        </div>
+        <span class="cena-dica tiny faint">arraste para girar</span>
+      </Organismo3D>
     </section>
 
     <!-- pergunta -->
@@ -257,12 +297,12 @@ const ROTULO_TIPO: Record<string, string> = {
     </TransitionGroup>
 
     <!-- status atual -->
-    <div class="cartoes stagger">
+    <div ref="cartoes" class="cartoes">
       <CartaoMed v-for="s in status" :key="s.med.id" :status="s" />
     </div>
 
     <!-- dia interativo -->
-    <section class="card dia">
+    <section class="card dia revelar">
       <header class="dia-cab">
         <div>
           <p class="eyebrow">Seu dia, hora a hora</p>
@@ -290,7 +330,7 @@ const ROTULO_TIPO: Record<string, string> = {
           <RelogioDia v-model:hora="hora" :series="series" :eventos="eventos" :inicio-dia="inicioDia" :hora-agora="horaAgora" @arrastando="(v) => (arrastando = v)" />
           <div class="controles">
             <button class="btn btn-icon btn-ghost" aria-label="Reiniciar" @click="reiniciar"><RotateCcw :size="17" /></button>
-            <button class="btn play" :class="{ tocando }" :aria-label="tocando ? 'Pausar' : 'Reproduzir o dia'" @click="alternarReproducao">
+            <button v-magnetico="0.35" class="btn play" :class="{ tocando }" :aria-label="tocando ? 'Pausar' : 'Reproduzir o dia'" @click="alternarReproducao">
               <Transition name="troca" mode="out-in">
                 <Pause v-if="tocando" :size="20" />
                 <Play v-else :size="20" style="margin-left: 2px" />
@@ -325,7 +365,7 @@ const ROTULO_TIPO: Record<string, string> = {
             </Transition>
           </div>
 
-          <ol ref="lista" class="roteiro">
+          <ol ref="lista" class="roteiro" data-lenis-prevent>
             <li
               v-for="e in eventos"
               :key="e.id"
@@ -362,17 +402,44 @@ const ROTULO_TIPO: Record<string, string> = {
 
 /* hero */
 .hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-  padding: 14px 2px 6px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 12px;
+  padding: 6px 2px 0;
+  min-height: 460px;
 }
 .hero-texto {
   display: grid;
-  gap: 10px;
-  max-width: 640px;
+  gap: 14px;
+  align-content: center;
+  position: relative;
+  z-index: 1;
+}
+.cena {
+  height: 480px;
+  margin: -40px -20px -30px 0;
+}
+.cena-legenda {
+  position: absolute;
+  left: 8%;
+  bottom: 10%;
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+}
+.ponto-cor {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.cena-dica {
+  position: absolute;
+  right: 8%;
+  bottom: 10%;
+  pointer-events: none;
+  animation: respirar 3s ease-in-out infinite;
 }
 .hero h1 {
   font-size: clamp(2.6rem, 7vw, 4.2rem);
@@ -467,7 +534,6 @@ const ROTULO_TIPO: Record<string, string> = {
   display: grid;
   gap: 22px;
   padding: 24px;
-  animation: pop-in 0.8s var(--ease-out) 0.25s both;
 }
 .dia-cab {
   display: flex;
@@ -724,6 +790,23 @@ const ROTULO_TIPO: Record<string, string> = {
 }
 
 @media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .cena {
+    height: 340px;
+    margin: -10px -16px 0;
+    order: -1;
+  }
+  .cena-legenda {
+    left: 16px;
+    bottom: 6px;
+  }
+  .cena-dica {
+    right: 16px;
+    bottom: 6px;
+  }
   .dia-corpo {
     grid-template-columns: 1fr;
   }

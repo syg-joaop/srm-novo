@@ -596,3 +596,45 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* ---------- cenas acionadas pela rolagem ---------- */
+/* Animações ficam pausadas no primeiro quadro até a seção entrar na tela. */
+[data-cena]:not([data-em-cena]),
+[data-cena]:not([data-em-cena]) *,
+[data-cena]:not([data-em-cena]) *::before,
+[data-cena]:not([data-em-cena]) *::after {
+  animation-play-state: paused !important;
+}
+[data-cena] {
+  transition: opacity 0.9s var(--ease-out), transform 1s var(--ease-out), filter 0.9s var(--ease-out);
+}
+[data-cena]:not([data-em-cena]) {
+  opacity: 0;
+  transform: translateY(36px);
+  filter: blur(6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-cena]:not([data-em-cena]) {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* brilho que segue o ponteiro nos cartões inclináveis */
+.inclinavel {
+  will-change: transform;
+}
+.inclinavel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--luz-x, 50%) var(--luz-y, 50%), color-mix(in srgb, var(--text) 7%, transparent), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.inclinavel:hover::after {
+  opacity: 1;
+}

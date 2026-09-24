@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { ativarCenas, recalcularRolagem } from '../lib/movimento'
 import { ChevronDown } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { encontrarInteracoes, ROTULO_GRAVIDADE, SUBSTANCIAS, type Participante } from '../data/interacoes'
 import { estado, inicioPessoal, medsAtivas, perfilDe, todosPerfis } from '../store'
 import { deMinutos, minutosDe } from '../lib/datas'
@@ -80,16 +81,25 @@ const alertasHorario = computed(() => {
   }
   return r
 })
+
+/* ---------- montagem pela rolagem ---------- */
+const raizCena = ref<HTMLElement | null>(null)
+let desfazerCenas: (() => void) & { reativar?: () => void } = () => {}
+onMounted(() => {
+  if (raizCena.value) desfazerCenas = ativarCenas(raizCena.value)
+})
+onActivated(() => recalcularRolagem(520, desfazerCenas))
+onBeforeUnmount(() => desfazerCenas())
 </script>
 
 <template>
-  <div class="stack">
-    <section class="entrar">
+  <div ref="raizCena" class="stack">
+    <section data-cena>
       <h2>Interações e horários</h2>
       <p class="small muted">Como suas medicações conversam entre si, com o que você consome e ao longo do dia.</p>
     </section>
 
-    <section class="card entrar" style="animation-delay: 0.05s">
+    <section class="card" data-cena>
       <h3 style="margin-bottom: 4px">Mapa de funcionamento do dia</h3>
       <p class="small muted" style="margin-bottom: 14px">Baseado nos horários planejados e no seu início pessoal, quando já houver registros.</p>
       <div class="gantt">
@@ -116,7 +126,7 @@ const alertasHorario = computed(() => {
       </ul>
     </section>
 
-    <section class="card entrar" style="animation-delay: 0.1s">
+    <section class="card" data-cena>
       <h3 style="margin-bottom: 8px">Verificar com</h3>
       <div class="row wrap" style="gap: 6px">
         <span v-for="m in medsAtivas" :key="m.id" class="chip fixo" :style="{ '--cor': m.cor }">{{ perfilDe(m).emoji }} {{ m.nome }}</span>
@@ -131,7 +141,7 @@ const alertasHorario = computed(() => {
       </label>
     </section>
 
-    <section class="stack">
+    <section class="stack" data-cena>
       <div class="row wrap resumo">
         <Transition name="fade" mode="out-in">
           <span v-if="!interacoes.length" key="ok" class="chip ok">✅ Nenhuma interação conhecida entre os itens selecionados</span>
@@ -145,6 +155,7 @@ const alertasHorario = computed(() => {
         <article
           v-for="i in interacoes"
           :key="i.regra.id + i.x.id + i.y.id"
+          v-inclinar="3"
           class="card interacao"
           :class="['gravidade-' + i.regra.gravidade, { aberta: aberta === i.regra.id + i.x.id + i.y.id }]"
         >

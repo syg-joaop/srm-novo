@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { ativarCenas, recalcularRolagem } from '../lib/movimento'
 import { ChevronDown, Pause, Pencil, Play, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
 import MedIcone from '../components/MedIcone.vue'
-import { computed, reactive, ref } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import FichaPerfil from '../components/FichaPerfil.vue'
 import Modal from '../components/Modal.vue'
 import { avisar, estado, inicioPessoal, perfilDe, proximaCor, removerMedicacao, salvarMedicacao, todosPerfis, uid } from '../store'
@@ -133,11 +134,20 @@ function criarPersonalizada() {
 }
 
 const perfisDaBiblioteca = PERFIS.length
+
+/* ---------- montagem pela rolagem ---------- */
+const raizCena = ref<HTMLElement | null>(null)
+let desfazerCenas: (() => void) & { reativar?: () => void } = () => {}
+onMounted(() => {
+  if (raizCena.value) desfazerCenas = ativarCenas(raizCena.value)
+})
+onActivated(() => recalcularRolagem(520, desfazerCenas))
+onBeforeUnmount(() => desfazerCenas())
 </script>
 
 <template>
-  <div class="stack">
-    <section class="row between wrap entrar">
+  <div ref="raizCena" class="stack">
+    <section class="row between wrap" data-cena>
       <div>
         <h2>Minhas medicações</h2>
         <p class="small muted">Toque para ver como cada uma age e seus horários.</p>
@@ -146,7 +156,7 @@ const perfisDaBiblioteca = PERFIS.length
     </section>
 
     <TransitionGroup name="lista" tag="div" class="stack">
-      <article v-for="m in estado.medicacoes" :key="m.id" class="card med" :class="{ aberta: aberta === m.id, inativa: !m.ativa }" :style="{ '--cor': m.cor }">
+      <article v-for="m in estado.medicacoes" :key="m.id" data-cena class="card med" :class="{ aberta: aberta === m.id, inativa: !m.ativa }" :style="{ '--cor': m.cor }">
         <button class="topo" :aria-expanded="aberta === m.id" @click="aberta = aberta === m.id ? null : m.id">
           <MedIcone :perfil="perfilDe(m)" :cor="m.cor" :tamanho="44" class="icone-med" />
           <span style="flex: 1 1 180px; text-align: left; min-width: 0">

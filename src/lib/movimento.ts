@@ -108,3 +108,100 @@ export function pulsar(el: Element) {
 }
 
 export { gsap, ScrollTrigger }
+
+/* ---------- cenas acionadas pela rolagem ---------- */
+
+/**
+ * Marca com `data-em-cena` os elementos `[data-cena]` de `raiz` quando entram na tela.
+ * Enquanto não entram, as animações CSS deles ficam pausadas (ver styles.css),
+ * então cada seção "se monta" só quando é vista.
+ */
+export function ativarCenas(raiz: HTMLElement) {
+  const registrados = new WeakSet<Element>()
+  const gatilhos: ScrollTrigger[] = []
+
+  function varrer() {
+    const novos = [...raiz.querySelectorAll<HTMLElement>('[data-cena]:not([data-em-cena])')].filter((el) => !registrados.has(el))
+    if (!novos.length) return
+    novos.forEach((el) => registrados.add(el))
+    if (movimentoReduzido()) {
+      novos.forEach((el) => el.setAttribute('data-em-cena', ''))
+      return
+    }
+    // O que já está na tela entra direto (em cascata); o resto espera a rolagem.
+    const limite = window.innerHeight * 0.92
+    const naTela = novos.filter((el) => el.getBoundingClientRect().top < limite)
+    const abaixo = novos.filter((el) => !naTela.includes(el))
+    naTela.forEach((el, i) => setTimeout(() => el.setAttribute('data-em-cena', ''), 60 + i * 90))
+    if (!abaixo.length) return
+    gatilhos.push(
+      ...ScrollTrigger.batch(abaixo, {
+        start: 'top 90%',
+        once: true,
+        onEnter: (lote) => lote.forEach((el, i) => setTimeout(() => el.setAttribute('data-em-cena', ''), i * 90)),
+      }),
+    )
+  }
+
+  // espera um quadro para o layout da aba assentar
+  requestAnimationFrame(varrer)
+  // elementos que aparecem depois (ex.: remédio recém-adicionado) também entram em cena
+  const obs = new MutationObserver(() => varrer())
+  obs.observe(raiz, { childList: true, subtree: true })
+  /** Ao reabrir a aba: ativa o que estiver visível e recalcula os gatilhos. */
+  function reativar() {
+    const limite = window.innerHeight * 0.92
+    raiz.querySelectorAll<HTMLElement>('[data-cena]:not([data-em-cena])').forEach((el, i) => {
+      if (el.getBoundingClientRect().top < limite) setTimeout(() => el.setAttribute('data-em-cena', ''), i * 90)
+    })
+    varrer()
+    ScrollTrigger.refresh()
+    // (um atributo, e não uma classe: o Vue reescreve className ao re-renderizar)
+  }
+  const desfazer = () => {
+    obs.disconnect()
+    gatilhos.forEach((g) => g.kill())
+  }
+  return Object.assign(desfazer, { reativar })
+}
+
+/** Recalcula as posições depois que a aba termina de entrar (KeepAlive + transição). */
+export function recalcularRolagem(atrasoMs = 520, cenas?: { reativar?: () => void }) {
+  setTimeout(() => (cenas?.reativar ? cenas.reativar() : ScrollTrigger.refresh()), atrasoMs)
+}
+
+/* ---------- inclinação 3D ---------- */
+
+interface ElInclinavel extends HTMLElement {
+  _inclinar?: { mover: (e: PointerEvent) => void; sair: () => void }
+}
+
+/** `v-inclinar`: o cartão inclina em 3D acompanhando o ponteiro. `v-inclinar="6"` = graus máximos. */
+export const vInclinar: Directive<ElInclinavel, number | undefined> = {
+  mounted(el, binding) {
+    if (movimentoReduzido() || !window.matchMedia('(pointer: fine)').matches) return
+    const graus = binding.value ?? 5
+    gsap.set(el, { transformPerspective: 900, transformStyle: 'preserve-3d' })
+    const rx = gsap.quickTo(el, 'rotationX', { duration: 0.6, ease: 'power3.out' })
+    const ry = gsap.quickTo(el, 'rotationY', { duration: 0.6, ease: 'power3.out' })
+    const mover = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      const nx = (e.clientX - r.left) / r.width - 0.5
+      const ny = (e.clientY - r.top) / r.height - 0.5
+      ry(nx * graus * 2)
+      rx(-ny * graus * 2)
+      el.style.setProperty('--luz-x', `${(nx + 0.5) * 100}%`)
+      el.style.setProperty('--luz-y', `${(ny + 0.5) * 100}%`)
+    }
+    const sair = () => gsap.to(el, { rotationX: 0, rotationY: 0, duration: 1, ease: 'elastic.out(1, 0.5)' })
+    el._inclinar = { mover, sair }
+    el.classList.add('inclinavel')
+    el.addEventListener('pointermove', mover)
+    el.addEventListener('pointerleave', sair)
+  },
+  unmounted(el) {
+    if (!el._inclinar) return
+    el.removeEventListener('pointermove', el._inclinar.mover)
+    el.removeEventListener('pointerleave', el._inclinar.sair)
+  },
+}

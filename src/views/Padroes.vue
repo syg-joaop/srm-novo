@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { CalendarDays, Minus, Sunset, TrendingDown, TrendingUp, Utensils } from 'lucide-vue-next'
 import MedIcone from '../components/MedIcone.vue'
-import { computed } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
+import { ativarCenas, gsap, movimentoReduzido, recalcularRolagem, ScrollTrigger } from '../lib/movimento'
 import Numero from '../components/Numero.vue'
 import { estado, perfilDe, sequencia, temposPessoais } from '../store'
 import { chaveDia, deChave, duracao, faixaHoras, inicioDoDia, somarDias } from '../lib/datas'
@@ -100,33 +101,82 @@ const primeiroDia = computed(() => {
   return d ? deChave(chaveDia(d.em)) : null
 })
 
+/* ---------- montagem pela rolagem ---------- */
+
+const raiz = ref<HTMLElement | null>(null)
+let desfazer: (() => void) & { reativar?: () => void } = () => {}
+let ctx: gsap.Context | null = null
+
+onMounted(() => {
+  const el = raiz.value
+  if (!el) return
+  desfazer = ativarCenas(el)
+  if (movimentoReduzido()) return
+  ctx = gsap.context(() => {
+    // barras semanais crescem conforme a rolagem (scrub)
+    const semanasEl = el.querySelector('.semanas')
+    if (semanasEl) {
+      gsap.fromTo(
+        semanasEl.querySelectorAll('.b'),
+        { scaleY: 0, transformOrigin: '50% 100%' },
+        { scaleY: 1, ease: 'none', stagger: 0.04, scrollTrigger: { trigger: semanasEl, start: 'clamp(top 95%)', end: 'clamp(bottom 70%)', scrub: 0.8 } },
+      )
+    }
+    // foco por hora: onda da esquerda para a direita
+    const horasEl = el.querySelector('.horas')
+    if (horasEl) {
+      gsap.fromTo(
+        horasEl.querySelectorAll('.b'),
+        { scaleY: 0, transformOrigin: '50% 100%' },
+        { scaleY: 1, ease: 'none', stagger: 0.03, scrollTrigger: { trigger: horasEl, start: 'clamp(top 95%)', end: 'clamp(bottom 80%)', scrub: 0.8 } },
+      )
+    }
+    // sparklines se desenham acompanhando a rolagem
+    el.querySelectorAll<SVGPathElement>('.spark path').forEach((path) => {
+      gsap.fromTo(path, { strokeDashoffset: 1 }, { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: path.closest('.spark'), start: 'clamp(top 95%)', end: 'clamp(bottom 65%)', scrub: 1 } })
+    })
+    // marcador "você" desliza da dose até o seu início típico
+    el.querySelectorAll<HTMLElement>('.regua').forEach((regua) => {
+      const mediana = regua.querySelector<HTMLElement>('.mediana')
+      if (mediana) gsap.from(mediana, { left: '0%', duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: regua, start: 'top 88%', once: true } })
+    })
+  }, el)
+})
+onActivated(() => recalcularRolagem(520, desfazer))
+onBeforeUnmount(() => {
+  desfazer()
+  ctx?.revert()
+})
+
+void ScrollTrigger
+
 function pctEscala(h: number, escala: number) {
   return `${Math.min(100, (h / escala) * 100)}%`
 }
 </script>
 
 <template>
-  <div class="stack">
-    <section class="entrar">
+  <div ref="raiz" class="stack">
+    <section data-cena>
       <h2>Seus padrões</h2>
       <p class="small muted">Quanto mais você registra “senti o efeito”, mais preciso fica o seu perfil.</p>
     </section>
 
-    <div class="kpis stagger">
-      <div class="card kpi">
+    <div class="kpis" data-cena>
+      <div v-inclinar class="card kpi">
         <span class="tiny faint">Dias acompanhados</span>
         <strong><Numero :valor="diasComDose" /></strong>
         <span v-if="primeiroDia" class="tiny faint">desde {{ primeiroDia.toLocaleDateString('pt-BR') }}</span>
       </div>
-      <div class="card kpi">
+      <div v-inclinar class="card kpi">
         <span class="tiny faint">Registros de efeito</span>
         <strong><Numero :valor="totalRegistros" /></strong>
       </div>
-      <div class="card kpi">
+      <div v-inclinar class="card kpi">
         <span class="tiny faint">Sequência atual</span>
         <strong><Numero :valor="sequencia" /> <span class="small">dias</span></strong>
       </div>
-      <div class="card kpi">
+      <div v-inclinar class="card kpi">
         <span class="tiny faint">Melhor horário de foco</span>
         <strong>{{ melhorHora ? String(melhorHora.h).padStart(2, '0') + 'h' : '—' }}</strong>
         <span v-if="melhorHora" class="tiny faint">foco médio {{ melhorHora.foco.toFixed(1) }}</span>
@@ -138,7 +188,7 @@ function pctEscala(h: number, escala: number) {
       exemplo em <button class="link" @click="ui.modalAjustes = true">Ajustes</button>.
     </p>
 
-    <article v-for="(m, idx) in porMed" :key="m.med.id" class="card med entrar" :style="{ '--cor': m.med.cor, animationDelay: 0.1 + idx * 0.08 + 's' }">
+    <article v-for="m in porMed" :key="m.med.id" class="card med" data-cena :style="{ '--cor': m.med.cor }">
       <header class="row between wrap">
         <div class="row">
           <MedIcone :perfil="m.perfil" :cor="m.med.cor" :tamanho="44" />
@@ -149,7 +199,10 @@ function pctEscala(h: number, escala: number) {
         </div>
         <div class="destaque">
           <span class="tiny faint">Seu início típico</span>
-          <strong>{{ m.mediana != null ? duracao(m.mediana) : '—' }}</strong>
+          <strong v-if="m.mediana != null" class="tabular">
+            <template v-if="Math.floor(m.mediana) > 0"><Numero :valor="Math.floor(m.mediana)" />h </template><Numero :valor="Math.round((m.mediana % 1) * 60)" />min
+          </strong>
+          <strong v-else>—</strong>
           <span class="tiny faint">referência {{ faixaHoras(m.perfil.efeito.inicioH) }}</span>
         </div>
       </header>
@@ -197,7 +250,7 @@ function pctEscala(h: number, escala: number) {
       <p v-if="m.inicios.length > 1" class="tiny faint">Tempo até o início em cada registro (mais baixo = mais rápido)</p>
     </article>
 
-    <section class="card entrar" style="animation-delay: 0.3s">
+    <section class="card" data-cena>
       <h3>Humor, foco e energia por semana</h3>
       <p class="small muted" style="margin-bottom: 14px">É aqui que o efeito de antidepressivos como a bupropiona aparece, ao longo de semanas.</p>
       <div class="semanas">
@@ -214,7 +267,7 @@ function pctEscala(h: number, escala: number) {
     </section>
 
     <div class="grid-2">
-      <section class="card entrar" style="animation-delay: 0.35s">
+      <section class="card" data-cena>
         <h3 style="margin-bottom: 12px">Foco ao longo do dia</h3>
         <div class="horas">
           <div v-for="b in porHora" :key="b.h" class="hora" :style="{ '--i': b.h }">
@@ -223,7 +276,7 @@ function pctEscala(h: number, escala: number) {
           </div>
         </div>
       </section>
-      <section class="card entrar" style="animation-delay: 0.4s">
+      <section class="card" data-cena>
         <h3 style="margin-bottom: 12px">Sintomas mais frequentes</h3>
         <p v-if="!sintomas.length" class="small faint">Nenhum sintoma registrado.</p>
         <div class="stack" style="gap: 8px">
@@ -392,8 +445,6 @@ function pctEscala(h: number, escala: number) {
 }
 .spark path {
   stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: desenhar 1.4s var(--ease-out) 0.3s forwards;
 }
 @keyframes desenhar {
   to {
@@ -422,9 +473,6 @@ function pctEscala(h: number, escala: number) {
   width: 30%;
   max-width: 14px;
   border-radius: 6px 6px 2px 2px;
-  transform-origin: bottom;
-  animation: subir 0.9s var(--ease-spring) both;
-  animation-delay: calc(var(--i) * 60ms + 0.3s);
 }
 .humor {
   background: #ec4899;
@@ -472,9 +520,6 @@ function pctEscala(h: number, escala: number) {
   width: 100%;
   border-radius: 4px 4px 1px 1px;
   background: linear-gradient(to top, var(--primary), var(--primary-2));
-  transform-origin: bottom;
-  animation: subir 0.8s var(--ease-spring) both;
-  animation-delay: calc(var(--i) * 25ms + 0.2s);
 }
 .sintoma {
   display: flex;

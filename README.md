@@ -27,6 +27,8 @@ Modelo de 1 compartimento com absorção de 1ª ordem (função de Bateman), com
 - **Three.js**: cena 3D do organismo (`src/lib/cena3d.ts`), carregada sob demanda num chunk separado; pausa fora da tela, respeita `prefers-reduced-motion` e tem fallback sem WebGL.
 - **GSAP + ScrollTrigger**: título revelado palavra por palavra, entradas em cascata, revelação ao rolar, contadores numéricos e botões magnéticos (`v-magnetico`), em `src/lib/movimento.ts`.
 - **Lenis**: rolagem suave com inércia em desktop (desativada em toque e em movimento reduzido).
+- **Por aba**: o calendário vira os meses em 3D numa onda célula a célula (no sentido da navegação) e ondula a partir do dia selecionado ao trocar o modo de cor; em Padrões, as barras semanais, o foco por hora e as sparklines se montam conforme a rolagem (scrub) e o marcador "você" desliza até o seu início típico; Remédios e Interações entram em cena ao rolar, e cartões inclinam em 3D seguindo o mouse (`v-inclinar`).
+- Seções marcadas com `data-cena` ficam com as animações CSS pausadas até entrarem na tela (`ativarCenas` em `src/lib/movimento.ts`).
 
 ## Rodando
 

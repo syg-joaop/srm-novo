@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Pill, Smile, Sparkles, Target, Utensils, Zap } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { gsap, movimentoReduzido, pulsar } from '../lib/movimento'
 import CurvaDia from '../components/CurvaDia.vue'
 import { adesaoDoDia, agora, doseAnterior, dosesDoDia, efeitosDoDia, estado, medPorId, mediaDoDia, perfilDe, removerDose, removerEfeito } from '../store'
 import { chaveDia, DIAS_SEMANA_CURTO, dataLonga, deChave, duracao, hhmm, HORA, NOMES_MES } from '../lib/datas'
@@ -31,9 +32,77 @@ function irHoje() {
   selecionar(chaveDia(d))
 }
 
-function selecionar(chave: string) {
+function selecionar(chave: string, ev?: Event) {
   selecionado.value = chave
   ui.diaCalendario = chave
+  if (ev?.currentTarget) pulsar(ev.currentTarget as Element)
+}
+
+/* ---------- virada 3D dos meses ---------- */
+
+const grade = ref<HTMLElement | null>(null)
+const GRADE: [number, number] = [6, 7]
+// Próximo mês: as células viram da direita para a esquerda; anterior, o inverso.
+const origem = (entrando: boolean): [number, number] => ((direcao.value > 0) === entrando ? [1, 0.5] : [0, 0.5])
+
+function entrarGrade(el: Element, done: () => void) {
+  if (movimentoReduzido()) return done()
+  gsap.fromTo(
+    el.children,
+    { rotationY: direcao.value * 80, rotationX: -8, z: -120, opacity: 0, transformPerspective: 900 },
+    {
+      rotationY: 0,
+      rotationX: 0,
+      z: 0,
+      opacity: 1,
+      duration: 0.75,
+      ease: 'expo.out',
+      stagger: { grid: GRADE, from: origem(true), amount: 0.32 },
+      clearProps: 'transform,opacity',
+      onComplete: done,
+    },
+  )
+}
+
+function sairGrade(el: Element, done: () => void) {
+  if (movimentoReduzido()) return done()
+  gsap.to(el.children, {
+    rotationY: -direcao.value * 80,
+    rotationX: 8,
+    z: -120,
+    opacity: 0,
+    transformPerspective: 900,
+    duration: 0.32,
+    ease: 'power2.in',
+    stagger: { grid: GRADE, from: origem(false), amount: 0.16 },
+    onComplete: done,
+  })
+}
+
+// Troca de modo de cor: ondulação a partir do dia selecionado.
+watch(modo, () => {
+  const el = grade.value
+  if (!el || movimentoReduzido()) return
+  const idx = Math.max(0, celulas.value.findIndex((c) => c.chave === selecionado.value))
+  gsap.fromTo(
+    el.children,
+    { scale: 0.82, opacity: 0.4 },
+    { scale: 1, opacity: 1, duration: 0.8, ease: 'elastic.out(1, 0.55)', stagger: { grid: GRADE, from: idx, amount: 0.45 }, clearProps: 'transform,opacity' },
+  )
+})
+
+/* ---------- detalhe do dia ---------- */
+
+function entrarDetalhe(el: Element, done: () => void) {
+  if (movimentoReduzido()) return done()
+  const tl = gsap.timeline({ onComplete: done })
+  tl.fromTo(el, { opacity: 0, y: 30, rotationX: -6, transformPerspective: 1200 }, { opacity: 1, y: 0, rotationX: 0, duration: 0.7, ease: 'expo.out', clearProps: 'transform' })
+  tl.fromTo(el.querySelectorAll('.itens li, .inicio'), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05 }, '-=0.45')
+}
+
+function sairDetalhe(el: Element, done: () => void) {
+  if (movimentoReduzido()) return done()
+  gsap.to(el, { opacity: 0, y: -12, duration: 0.2, ease: 'power2.in', onComplete: done })
 }
 
 interface Celula {
@@ -178,8 +247,8 @@ function tecla(e: KeyboardEvent, c: Celula) {
       </div>
 
       <div class="viewport" @touchstart.passive="toqueInicio" @touchend="toqueFim">
-        <Transition :name="direcao > 0 ? 'grade-prox' : 'grade-ant'" mode="out-in">
-          <div :key="`${ano}-${mes}-${modo}`" class="grade">
+        <Transition :css="false" mode="out-in" appear @enter="entrarGrade" @leave="sairGrade">
+          <div ref="grade" :key="`${ano}-${mes}`" class="grade">
             <button
               v-for="(c, i) in celulas"
               :key="c.chave"
@@ -188,7 +257,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
               :style="{ '--i': i, '--calor': corCalor(c.valor) }"
               :aria-label="`${c.dia}, ${c.pontos.filter((p) => p.estado === 'tomada').length} de ${c.pontos.length} doses`"
               :aria-pressed="c.chave === selecionado"
-              @click="selecionar(c.chave)"
+              @click="selecionar(c.chave, $event)"
               @keydown="tecla($event, c)"
             >
               <span class="num tabular">{{ c.dia }}</span>
@@ -222,7 +291,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
       </div>
     </section>
 
-    <Transition name="fade" mode="out-in">
+    <Transition :css="false" mode="out-in" @enter="entrarDetalhe" @leave="sairDetalhe">
       <section :key="selecionado" class="card detalhe">
         <header class="row between wrap">
           <div>
@@ -339,6 +408,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
   text-transform: uppercase;
 }
 .viewport {
+  perspective: 1400px;
   overflow: hidden;
   padding: 4px;
   margin: -4px;
@@ -354,8 +424,6 @@ function tecla(e: KeyboardEvent, c: Celula) {
   align-items: center;
   justify-content: space-between;
   padding: 6px 2px;
-  animation: pop-in 0.45s var(--ease-out) both;
-  animation-delay: calc(var(--i) * 12ms);
   transition: transform 0.3s var(--ease-spring), border-color 0.2s, box-shadow 0.2s, background 0.3s;
   min-height: 48px;
 }
@@ -511,25 +579,19 @@ function tecla(e: KeyboardEvent, c: Celula) {
 .mes-prox-enter-active,
 .mes-prox-leave-active,
 .mes-ant-enter-active,
-.mes-ant-leave-active,
-.grade-prox-enter-active,
-.grade-prox-leave-active,
-.grade-ant-enter-active,
-.grade-ant-leave-active {
-  transition: opacity 0.25s, transform 0.3s var(--ease-out);
+.mes-ant-leave-active {
+  transition: opacity 0.3s, transform 0.45s var(--ease-out), filter 0.3s;
 }
 .mes-prox-enter-from,
-.grade-prox-enter-from,
-.mes-ant-leave-to,
-.grade-ant-leave-to {
+.mes-ant-leave-to {
   opacity: 0;
-  transform: translateX(40px);
+  transform: translateY(14px) rotateX(-50deg);
+  filter: blur(4px);
 }
 .mes-prox-leave-to,
-.grade-prox-leave-to,
-.mes-ant-enter-from,
-.grade-ant-enter-from {
+.mes-ant-enter-from {
   opacity: 0;
-  transform: translateX(-40px);
+  transform: translateY(-14px) rotateX(50deg);
+  filter: blur(4px);
 }
 </style>

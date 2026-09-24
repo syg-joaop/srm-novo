@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Pill } from 'lucide-vue-next'
+import MedIcone from './MedIcone.vue'
 import { computed, ref } from 'vue'
 import Modal from './Modal.vue'
 import { avisar, dosesDoDia, estado, inicioPessoal, medPorId, medsAtivas, perfilDe, registrarDose } from '../store'
@@ -84,7 +86,7 @@ function salvar() {
         :style="{ '--cor': m.cor }"
         @click="trocarMed(m.id)"
       >
-        <span class="emoji">{{ perfilDe(m).emoji }}</span>
+        <MedIcone :perfil="perfilDe(m)" :cor="m.cor" :tamanho="34" />
         <span>
           <strong>{{ m.nome }}</strong>
           <span class="tiny faint" style="display: block">{{ m.doseMg }} mg</span>
@@ -137,13 +139,13 @@ function salvar() {
     </Transition>
 
     <Transition name="fade">
-      <p v-if="ehTardio" class="alerta small">⚠️ Depois das {{ limite() }} esta medicação pode atrapalhar o sono (você dorme às {{ estado.preferencias.dormir }}).</p>
+      <p v-if="ehTardio" class="alerta small">Depois das {{ limite() }} esta medicação pode atrapalhar o sono (você dorme às {{ estado.preferencias.dormir }}).</p>
     </Transition>
 
     <template #rodape>
       <button class="btn btn-ghost" @click="emit('fechar')">Cancelar</button>
       <button class="btn btn-primary" :class="{ explodir: salvando }" :disabled="!med || salvando" @click="salvar">
-        <span>💊 Registrar</span>
+        <span class="row" style="gap: 6px"><Pill :size="16" /> Registrar</span>
         <i v-for="n in 10" :key="n" class="particula" :style="{ '--a': n * 36 + 'deg' }" />
       </button>
     </template>

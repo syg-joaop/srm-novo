@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Pill, Smile, Sparkles, Target, Utensils, Zap } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import CurvaDia from '../components/CurvaDia.vue'
 import { adesaoDoDia, agora, doseAnterior, dosesDoDia, efeitosDoDia, estado, medPorId, mediaDoDia, perfilDe, removerDose, removerEfeito } from '../store'
@@ -165,7 +166,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
         <div class="row wrap">
           <div class="seg">
             <button v-for="m in (['doses', 'humor', 'foco', 'energia'] as Modo[])" :key="m" :class="{ ativo: modo === m }" @click="modo = m">
-              {{ m === 'doses' ? '💊 Doses' : m === 'humor' ? '😊 Humor' : m === 'foco' ? '🎯 Foco' : '⚡ Energia' }}
+              <component :is="m === 'doses' ? Pill : m === 'humor' ? Smile : m === 'foco' ? Target : Zap" :size="13" /> {{ m === 'doses' ? 'Doses' : m === 'humor' ? 'Humor' : m === 'foco' ? 'Foco' : 'Energia' }}
             </button>
           </div>
           <button class="btn btn-sm" @click="irHoje">Hoje</button>
@@ -191,7 +192,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
               @keydown="tecla($event, c)"
             >
               <span class="num tabular">{{ c.dia }}</span>
-              <span v-if="c.temEfeito" class="brilho">✨</span>
+              <Sparkles v-if="c.temEfeito" :size="11" class="brilho" />
               <span v-if="modo !== 'doses' && c.valor != null" class="valor tabular">{{ c.valor.toFixed(1) }}</span>
               <span class="pontos">
                 <i v-for="(p, k) in c.pontos" :key="k" :class="p.estado" :style="{ '--c': p.cor }" />
@@ -257,7 +258,7 @@ function tecla(e: KeyboardEvent, c: Celula) {
                 <span class="marca" />
                 <span class="tabular small" style="font-weight: 700">{{ hhmm(d.em) }}</span>
                 <span class="small">{{ medPorId(d.medId)?.nome }} · {{ d.doseMg }} mg</span>
-                <span v-if="d.comAlimento" class="tiny faint">🍽️</span>
+                <Utensils v-if="d.comAlimento" :size="13" class="faint" />
                 <button class="btn btn-ghost btn-sm x" aria-label="Remover" @click="removerDose(d.id)">✕</button>
               </li>
             </TransitionGroup>
@@ -311,6 +312,9 @@ function tecla(e: KeyboardEvent, c: Celula) {
   border-radius: 999px;
 }
 .seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
@@ -390,8 +394,9 @@ function tecla(e: KeyboardEvent, c: Celula) {
 }
 .brilho {
   position: absolute;
-  top: 2px;
-  right: 4px;
+  top: 5px;
+  right: 5px;
+  color: #fcd34d;
   font-size: 0.7rem;
   animation: balanco 3s ease-in-out infinite;
 }

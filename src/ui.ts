@@ -20,3 +20,6 @@ export function irPara(aba: Aba) {
   ui.direcao = ORDEM.indexOf(aba) >= ORDEM.indexOf(ui.aba) ? 1 : -1
   ui.aba = aba
 }
+
+/** Hora (fracionária) usada para colorir o céu ambiente do fundo. */
+export const ceu = reactive({ hora: new Date().getHours() + new Date().getMinutes() / 60 })

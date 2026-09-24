@@ -102,6 +102,11 @@ export function fatorAcumulo(meiaVidaH: number, intervaloH = 24): number {
   return 1 / (1 - Math.exp(-ke * intervaloH))
 }
 
+/** Pico esperado em uso contínuo (estado de equilíbrio), em unidades de "pico de uma dose". */
+export function nivelHabitual(perfil: PerfilFarmaco): number {
+  return fatorAcumulo(perfil.pk.meiaVidaH, 24 / Math.max(1, perfil.vezesAoDia))
+}
+
 export type Fase = 'aguardando' | 'janela' | 'subindo' | 'pico' | 'ativo' | 'diminuindo' | 'encerrado'
 
 export const ROTULO_FASE: Record<Fase, string> = {

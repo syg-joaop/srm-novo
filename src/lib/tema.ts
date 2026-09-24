@@ -19,3 +19,9 @@ export function aplicarTema(t: Tema = temaAtual()) {
     /* ignora */
   }
 }
+
+export function temaEscuro(): boolean {
+  const attr = document.documentElement.getAttribute('data-theme')
+  if (attr) return attr === 'dark'
+  return !window.matchMedia?.('(prefers-color-scheme: light)').matches
+}

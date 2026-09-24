@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted } from 'vue'
+import { X } from 'lucide-vue-next'
 
 defineProps<{ titulo: string; subtitulo?: string }>()
 const emit = defineEmits<{ fechar: [] }>()
@@ -19,7 +20,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', tecla))
           <h3>{{ titulo }}</h3>
           <p v-if="subtitulo" class="small muted">{{ subtitulo }}</p>
         </div>
-        <button class="btn btn-ghost btn-sm fechar" aria-label="Fechar" @click="emit('fechar')">✕</button>
+        <button class="btn btn-icon btn-sm btn-ghost fechar" aria-label="Fechar" @click="emit('fechar')"><X :size="17" /></button>
       </header>
       <div class="conteudo">
         <slot />
@@ -39,9 +40,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', tecla))
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(10, 6, 30, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
 }
 .janela {
   width: min(520px, 100%);
@@ -50,22 +51,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', tecla))
   flex-direction: column;
   background: var(--surface-solid);
   border: 1px solid var(--border);
-  border-radius: 24px;
-  box-shadow: var(--shadow-lg);
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
   overflow: hidden;
 }
 header {
-  padding: 18px 18px 8px;
+  padding: 22px 22px 8px;
   align-items: flex-start;
 }
 .conteudo {
-  padding: 8px 18px 18px;
+  padding: 10px 22px 22px;
   overflow-y: auto;
   display: grid;
   gap: 14px;
 }
 footer {
-  padding: 12px 18px 18px;
+  padding: 14px 22px 20px;
   border-top: 1px solid var(--border);
   justify-content: flex-end;
 }

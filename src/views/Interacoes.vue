@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronDown } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { encontrarInteracoes, ROTULO_GRAVIDADE, SUBSTANCIAS, type Participante } from '../data/interacoes'
 import { estado, inicioPessoal, medsAtivas, perfilDe, todosPerfis } from '../store'
@@ -89,7 +90,7 @@ const alertasHorario = computed(() => {
     </section>
 
     <section class="card entrar" style="animation-delay: 0.05s">
-      <h3 style="margin-bottom: 4px">⏱️ Mapa de funcionamento do dia</h3>
+      <h3 style="margin-bottom: 4px">Mapa de funcionamento do dia</h3>
       <p class="small muted" style="margin-bottom: 14px">Baseado nos horários planejados e no seu início pessoal, quando já houver registros.</p>
       <div class="gantt">
         <div class="camada">
@@ -116,7 +117,7 @@ const alertasHorario = computed(() => {
     </section>
 
     <section class="card entrar" style="animation-delay: 0.1s">
-      <h3 style="margin-bottom: 8px">🔎 Verificar com</h3>
+      <h3 style="margin-bottom: 8px">Verificar com</h3>
       <div class="row wrap" style="gap: 6px">
         <span v-for="m in medsAtivas" :key="m.id" class="chip fixo" :style="{ '--cor': m.cor }">{{ perfilDe(m).emoji }} {{ m.nome }}</span>
         <button v-for="s in SUBSTANCIAS" :key="s.id" class="chip sub" :class="{ on: substancias.includes(s.id) }" @click="alternar(s.id)">{{ s.emoji }} {{ s.nome }}</button>
@@ -158,7 +159,7 @@ const alertasHorario = computed(() => {
               <strong style="display: block">{{ i.regra.titulo }}</strong>
               <span class="tiny faint">{{ i.x.nome }} + {{ i.y.nome }}</span>
             </span>
-            <span class="seta">⌄</span>
+            <ChevronDown :size="18" class="seta" />
           </button>
           <div class="corpo-wrap">
             <div class="corpo">

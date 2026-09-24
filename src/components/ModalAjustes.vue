@@ -88,25 +88,25 @@ function apagar() {
       <p class="small muted" style="font-weight: 600; margin-bottom: 6px">Tema</p>
       <div class="seg">
         <button v-for="t in (['auto', 'claro', 'escuro'] as Tema[])" :key="t" :class="{ ativo: tema === t }" @click="trocarTema(t)">
-          {{ t === 'auto' ? '🌓 Automático' : t === 'claro' ? '☀️ Claro' : '🌙 Escuro' }}
+          {{ t === 'auto' ? 'Automático' : t === 'claro' ? 'Claro' : 'Escuro' }}
         </button>
       </div>
     </div>
 
     <button class="btn" @click="alternarNotificacoes">
-      {{ estado.preferencias.notificacoes ? '🔔 Lembretes ativados (desativar)' : '🔕 Ativar lembretes de dose e de início' }}
+      {{ estado.preferencias.notificacoes ? 'Lembretes ativados (desativar)' : 'Ativar lembretes de dose e de início' }}
     </button>
 
     <div class="row wrap">
-      <button class="btn btn-sm" @click="exportar">📤 Exportar dados</button>
+      <button class="btn btn-sm" @click="exportar">Exportar dados</button>
       <label class="btn btn-sm" style="display: inline-flex; cursor: pointer">
-        📥 Importar
+        Importar
         <input type="file" accept="application/json" hidden @change="importar" />
       </label>
-      <button class="btn btn-sm" @click="exemplo">🧪 Gerar dados de exemplo</button>
+      <button class="btn btn-sm" @click="exemplo">Gerar dados de exemplo</button>
     </div>
 
-    <button class="btn btn-sm btn-danger" @click="apagar">{{ confirmarApagar ? 'Toque de novo para confirmar' : '🗑️ Apagar todos os dados' }}</button>
+    <button class="btn btn-sm btn-danger" @click="apagar">{{ confirmarApagar ? 'Toque de novo para confirmar' : 'Apagar todos os dados' }}</button>
 
     <p class="tiny faint">
       Seus dados ficam apenas neste aparelho (armazenamento do navegador). As curvas são estimativas educativas baseadas em bulas e literatura.

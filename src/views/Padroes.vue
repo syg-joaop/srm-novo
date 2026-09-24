@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CalendarDays, Minus, Sunset, TrendingDown, TrendingUp, Utensils } from 'lucide-vue-next'
+import MedIcone from '../components/MedIcone.vue'
 import { computed } from 'vue'
 import Numero from '../components/Numero.vue'
 import { estado, perfilDe, sequencia, temposPessoais } from '../store'
@@ -132,14 +134,14 @@ function pctEscala(h: number, escala: number) {
     </div>
 
     <p v-if="!totalRegistros" class="card small muted vazio">
-      Ainda não há registros. Depois de tomar a dose, toque em <strong>✨ Senti o efeito</strong> quando perceber que começou. Para ver um exemplo agora, gere dados de
+      Ainda não há registros. Depois de tomar a dose, toque em <strong>Senti o efeito</strong> quando perceber que começou. Para ver um exemplo agora, gere dados de
       exemplo em <button class="link" @click="ui.modalAjustes = true">Ajustes</button>.
     </p>
 
     <article v-for="(m, idx) in porMed" :key="m.med.id" class="card med entrar" :style="{ '--cor': m.med.cor, animationDelay: 0.1 + idx * 0.08 + 's' }">
       <header class="row between wrap">
         <div class="row">
-          <span class="icone">{{ m.perfil.emoji }}</span>
+          <MedIcone :perfil="m.perfil" :cor="m.med.cor" :tamanho="44" />
           <div>
             <h3>{{ m.med.nome }}</h3>
             <p class="tiny faint">{{ m.inicios.length }} registro(s) de início</p>
@@ -168,23 +170,23 @@ function pctEscala(h: number, escala: number) {
 
       <div class="fatos">
         <div v-if="m.semComida != null || m.comComida != null" class="fato">
-          <span>🍽️</span>
+          <Utensils :size="16" class="ic" />
           <span class="small">
             Em jejum: <strong>{{ m.semComida != null ? duracao(m.semComida) : '—' }}</strong> · com refeição: <strong>{{ m.comComida != null ? duracao(m.comComida) : '—' }}</strong>
           </span>
         </div>
         <div v-if="m.duracao != null" class="fato">
-          <span>🌅</span>
+          <Sunset :size="16" class="ic" />
           <span class="small">Efeito costuma passar <strong>{{ duracao(m.duracao) }}</strong> após a dose (referência {{ faixaHoras(m.perfil.efeito.duracaoH) }})</span>
         </div>
         <div v-if="m.tendencia != null" class="fato">
-          <span>{{ Math.abs(m.tendencia) < 0.15 ? '➖' : m.tendencia < 0 ? '⏩' : '⏪' }}</span>
+          <component :is="Math.abs(m.tendencia) < 0.15 ? Minus : m.tendencia < 0 ? TrendingDown : TrendingUp" :size="16" class="ic" />
           <span class="small">
             {{ Math.abs(m.tendencia) < 0.15 ? 'Seu tempo de início está estável' : m.tendencia < 0 ? `Começando ${duracao(-m.tendencia)} mais cedo que antes` : `Começando ${duracao(m.tendencia)} mais tarde que antes` }}
           </span>
         </div>
         <div v-if="m.perfil.efeitoTerapeutico && !m.inicios.length" class="fato">
-          <span>🗓️</span>
+          <CalendarDays :size="16" class="ic" />
           <span class="small">No caso de {{ m.perfil.nome }}, o mais importante é acompanhar o humor semana a semana, no gráfico abaixo.</span>
         </div>
       </div>
@@ -371,6 +373,11 @@ function pctEscala(h: number, escala: number) {
 .fatos {
   display: grid;
   gap: 8px;
+}
+.fato .ic {
+  color: var(--cor);
+  flex: none;
+  margin-top: 2px;
 }
 .fato {
   display: flex;

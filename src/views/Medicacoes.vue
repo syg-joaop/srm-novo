@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ChevronDown, Pause, Pencil, Play, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
+import MedIcone from '../components/MedIcone.vue'
 import { computed, reactive, ref } from 'vue'
 import FichaPerfil from '../components/FichaPerfil.vue'
 import Modal from '../components/Modal.vue'
@@ -140,27 +142,27 @@ const perfisDaBiblioteca = PERFIS.length
         <h2>Minhas medicações</h2>
         <p class="small muted">Toque para ver como cada uma age e seus horários.</p>
       </div>
-      <button class="btn btn-primary" @click="etapa = 'biblioteca'">＋ Adicionar medicação</button>
+      <button class="btn btn-primary" @click="etapa = 'biblioteca'"><Plus :size="16" /> Adicionar medicação</button>
     </section>
 
     <TransitionGroup name="lista" tag="div" class="stack">
       <article v-for="m in estado.medicacoes" :key="m.id" class="card med" :class="{ aberta: aberta === m.id, inativa: !m.ativa }" :style="{ '--cor': m.cor }">
         <button class="topo" :aria-expanded="aberta === m.id" @click="aberta = aberta === m.id ? null : m.id">
-          <span class="icone">{{ perfilDe(m).emoji }}</span>
+          <MedIcone :perfil="perfilDe(m)" :cor="m.cor" :tamanho="44" class="icone-med" />
           <span style="flex: 1 1 180px; text-align: left; min-width: 0">
             <strong>{{ m.nome }} {{ m.doseMg }} mg</strong>
             <span class="tiny faint" style="display: block">{{ perfilDe(m).nome }} · {{ m.horarios.join(', ') || 'sem horário' }}{{ m.ativa ? '' : ' · pausada' }}</span>
           </span>
-          <span v-if="inicioPessoal(m.id) != null" class="chip pessoal">✨ seu início: {{ duracao(inicioPessoal(m.id)!) }}</span>
-          <span class="seta">⌄</span>
+          <span v-if="inicioPessoal(m.id) != null" class="chip pessoal"><Sparkles :size="12" /> seu início: {{ duracao(inicioPessoal(m.id)!) }}</span>
+          <ChevronDown :size="18" class="seta" />
         </button>
         <div class="corpo-wrap">
           <div class="corpo">
             <FichaPerfil v-if="aberta === m.id" :perfil="perfilDe(m)" :cor="m.cor" />
             <div class="row wrap" style="margin-top: 12px">
-              <button class="btn btn-sm" @click="editar(m)">✏️ Editar</button>
-              <button class="btn btn-sm" @click="m.ativa = !m.ativa">{{ m.ativa ? '⏸️ Pausar' : '▶️ Retomar' }}</button>
-              <button class="btn btn-sm btn-danger" @click="remover(m)">{{ confirmarRemover === m.id ? 'Confirmar remoção' : '🗑️ Remover' }}</button>
+              <button class="btn btn-sm" @click="editar(m)"><Pencil :size="14" /> Editar</button>
+              <button class="btn btn-sm" @click="m.ativa = !m.ativa"><component :is="m.ativa ? Pause : Play" :size="14" /> {{ m.ativa ? 'Pausar' : 'Retomar' }}</button>
+              <button class="btn btn-sm btn-danger" @click="remover(m)"><Trash2 :size="14" /> {{ confirmarRemover === m.id ? 'Confirmar remoção' : 'Remover' }}</button>
             </div>
           </div>
         </div>
@@ -176,14 +178,14 @@ const perfisDaBiblioteca = PERFIS.length
         <Transition name="fade" mode="out-in">
           <div v-if="previa" key="previa" class="stack">
             <button class="btn btn-sm btn-ghost" style="justify-self: start" @click="previa = null">‹ Voltar</button>
-            <h3>{{ previa.emoji }} {{ previa.nome }}</h3>
+            <h3 class="row"><MedIcone :perfil="previa" :tamanho="32" /> {{ previa.nome }}</h3>
             <FichaPerfil :perfil="previa" />
             <button class="btn btn-primary" @click="escolher(previa)">Usar esta medicação</button>
           </div>
           <div v-else key="lista" class="biblioteca">
             <TransitionGroup name="lista">
               <div v-for="p in resultados" :key="p.id" class="item-bib" :style="{ '--cor': p.cor }">
-                <span class="icone">{{ p.emoji }}</span>
+                <MedIcone :perfil="p" :tamanho="36" />
                 <span style="flex: 1; min-width: 0">
                   <strong class="small">{{ p.nome }}</strong>
                   <span class="tiny faint" style="display: block">{{ p.marcas.slice(0, 3).join(', ') || p.classe }}</span>
@@ -251,7 +253,7 @@ const perfisDaBiblioteca = PERFIS.length
 
     <!-- formulário -->
     <Transition name="modal">
-      <Modal v-if="etapa === 'formulario' && perfilEscolhido" :titulo="editando ? 'Editar medicação' : perfilEscolhido.emoji + ' ' + perfilEscolhido.nome" subtitulo="Dose e horários" @fechar="fechar">
+      <Modal v-if="etapa === 'formulario' && perfilEscolhido" :titulo="editando ? 'Editar medicação' : perfilEscolhido.nome" subtitulo="Dose e horários" @fechar="fechar">
         <div class="dois">
           <label>Nome exibido <input v-model="form.nome" /></label>
           <label>Dose (mg) <input v-model.number="form.doseMg" type="number" min="0" step="any" /></label>
@@ -316,7 +318,7 @@ const perfisDaBiblioteca = PERFIS.length
   flex: none;
   transition: transform 0.4s var(--ease-spring);
 }
-.med.aberta .icone {
+.med.aberta .icone-med {
   transform: rotate(-8deg) scale(1.08);
 }
 .seta {
